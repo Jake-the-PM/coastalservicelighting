@@ -1,0 +1,158 @@
+﻿Analyzing coastal services lighting app...                      
+
+   info - 'announce' is deprecated and shouldn't be used. Use sendAnnouncement instead. This API is incompatible with multiple windows. This feature was deprecated after v3.35.0-0.1.pre - lib\core\accessibility\a11y_labels.dart:160:22 - deprecated_member_use
+   info - 'announce' is deprecated and shouldn't be used. Use sendAnnouncement instead. This API is incompatible with multiple windows. This feature was deprecated after v3.35.0-0.1.pre - lib\core\accessibility\a11y_labels.dart:164:22 - deprecated_member_use
+   info - 'announce' is deprecated and shouldn't be used. Use sendAnnouncement instead. This API is incompatible with multiple windows. This feature was deprecated after v3.35.0-0.1.pre - lib\core\accessibility\a11y_labels.dart:168:22 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round().clamp(0, 255) - lib\core\accessibility\a11y_labels.dart:185:21 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round().clamp(0, 255) - lib\core\accessibility\a11y_labels.dart:186:21 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round().clamp(0, 255) - lib\core\accessibility\a11y_labels.dart:187:21 - deprecated_member_use
+   info - Dangling library doc comment - lib\core\config\supabase_config.dart:1:1 - dangling_library_doc_comments
+   info - Dangling library doc comment - lib\core\constants\app_specs.dart:1:1 - dangling_library_doc_comments
+warning - Unused import: 'dart:async' - lib\core\error\error_boundary.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\error\error_boundary.dart:88:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\error\error_boundary.dart:173:71 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:52:34 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\data\drivers\wled_demo_driver.dart:36:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\drivers\wled_demo_driver.dart:110:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\drivers\wled_demo_driver.dart:136:8 - avoid_print
+warning - The value of the field '_accessToken' isn't used - lib\data\integrations\alexa_skill_service.dart:21:11 - unused_field
+warning - The value of the field '_bridgePort' isn't used - lib\data\integrations\homekit_bridge_service.dart:21:8 - unused_field
+warning - Unused import: '../../core/constants/app_specs.dart' - lib\data\repositories\lighting_repository.dart:4:8 - unused_import
+warning - The value of the field '_securityZoneIds' isn't used - lib\data\repositories\lighting_repository.dart:27:18 - unused_field
+   info - Don't invoke 'print' in production code - lib\data\repositories\lighting_repository.dart:87:7 - avoid_print
+warning - The value of the local variable 'day' isn't used - lib\data\repositories\lighting_repository.dart:275:15 - unused_local_variable
+   info - Don't invoke 'print' in production code - lib\data\repositories\lighting_repository.dart:366:6 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\auth_service.dart:95:7 - avoid_print
+warning - The value of the field '_activeInstallationId' isn't used - lib\data\services\bridge_relay_service.dart:46:11 - unused_field
+warning - Unused import: 'dart:io' - lib\data\services\discovery_service.dart:2:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\data\services\discovery_service.dart:69:7 - avoid_print
+warning - Duplicate import - lib\data\services\installation_service.dart:4:8 - duplicate_import
+   info - Don't invoke 'print' in production code - lib\data\services\installation_service.dart:19:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\mdns_service.dart:29:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\rule_engine_stub.dart:12:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\rule_engine_stub.dart:59:7 - avoid_print
+warning - The value of the field '_latitude' isn't used - lib\data\services\schedule_service.dart:135:10 - unused_field
+warning - The value of the field '_longitude' isn't used - lib\data\services\schedule_service.dart:136:10 - unused_field
+   info - Don't invoke 'print' in production code - lib\data\wled\wled_client.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\wled\wled_client.dart:43:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\wled\wled_client.dart:97:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\wled\wled_client.dart:112:7 - avoid_print
+warning - Unused import: 'dart:convert' - lib\domain\models\installation.dart:1:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\main.dart:71:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\main.dart:73:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\main.dart:79:30 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\auth\login_screen.dart:114:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\auth\register_screen.dart:107:54 - deprecated_member_use
+warning - Duplicate import - lib\presentation\dashboard\dashboard_screen.dart:11:8 - duplicate_import
+warning - Unused import: '../installer/installer_provisioning_screen.dart' - lib\presentation\dashboard\dashboard_screen.dart:14:8 - unused_import
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\dashboard\dashboard_screen.dart:149:41 - deprecated_member_use
+   info - Use a 'SizedBox' to add whitespace to a layout - lib\presentation\dashboard\dashboard_screen.dart:365:14 - sized_box_for_whitespace
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\dashboard\dashboard_screen.dart:453:19 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\dashboard\palette_browser.dart:106:33 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\scene_editor_sheet.dart:90:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\scene_editor_sheet.dart:273:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\scene_editor_sheet.dart:308:62 - deprecated_member_use
+   info - Use 'const' for final variables initialized to a constant value - lib\presentation\dashboard\scene_editor_sheet.dart:324:5 - prefer_const_declarations
+   info - Unnecessary braces in a string interpolation - lib\presentation\dashboard\scene_editor_sheet.dart:325:39 - unnecessary_brace_in_string_interps
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\scene_editor_sheet.dart:333:46 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:396:31 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:396:49 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:396:69 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:411:28 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:411:46 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\scene_editor_sheet.dart:411:66 - deprecated_member_use
+warning - Unused import: '../widgets/liquid_container.dart' - lib\presentation\dashboard\zone_detail_sheet.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\zone_detail_sheet.dart:104:40 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\dashboard\zone_detail_sheet.dart:139:19 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\zone_detail_sheet.dart:177:39 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:212:90 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:212:101 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:212:114 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\dashboard\zone_detail_sheet.dart:297:61 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:370:70 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:370:81 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round().clamp(0, 255) - lib\presentation\dashboard\zone_detail_sheet.dart:370:94 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\create_installation_screen.dart:158:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\golden_key_screen.dart:66:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\golden_key_screen.dart:93:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\installer_dashboard_screen.dart:117:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\installer_dashboard_screen.dart:123:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\installer_provisioning_screen.dart:142:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\installer_provisioning_screen.dart:150:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\installer_provisioning_screen.dart:248:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\scan_key_screen.dart:87:48 - deprecated_member_use
+   info - The private field _activePoints could be 'final' - lib\presentation\installer\spatial_mapping_screen.dart:20:16 - prefer_final_fields
+   info - The private field _definedZones could be 'final' - lib\presentation\installer\spatial_mapping_screen.dart:21:30 - prefer_final_fields
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\installer\spatial_mapping_screen.dart:229:46 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\integrations\integrations_screen.dart:77:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\integrations\integrations_screen.dart:98:13 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:229:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:258:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:270:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:284:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:489:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:491:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:539:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\integrations\integrations_screen.dart:541:57 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\discovery_screen.dart:101:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\discovery_screen.dart:109:25 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\discovery_screen.dart:133:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\discovery_screen.dart:142:64 - deprecated_member_use
+warning - Unused import: '../../core/constants/app_specs.dart' - lib\presentation\onboarding\final_setup_screen.dart:2:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:37:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:37:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:43:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:43:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:49:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:49:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:55:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:55:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:61:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\onboarding\onboarding_screen.dart:61:37 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\onboarding_screen.dart:191:46 - deprecated_member_use
+warning - The value of the field '_isScanning' isn't used - lib\presentation\onboarding\welcome_screen.dart:18:8 - unused_field
+warning - Duplicate import - lib\presentation\onboarding\zone_mapping_screen.dart:4:8 - duplicate_import
+warning - The value of the local variable 'c' isn't used - lib\presentation\onboarding\zone_mapping_screen.dart:55:14 - unused_local_variable
+   info - Statements in a for should be enclosed in a block - lib\presentation\onboarding\zone_mapping_screen.dart:55:38 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\zone_mapping_screen.dart:175:56 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\onboarding\zone_mapping_screen.dart:236:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\zone_mapping_screen.dart:261:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\zone_mapping_screen.dart:263:69 - deprecated_member_use
+warning - A value for optional parameter 'key' isn't ever given - lib\presentation\onboarding\zone_mapping_screen.dart:355:11 - unused_element_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\onboarding\zone_mapping_screen.dart:372:41 - deprecated_member_use
+warning - Unused import: '../../core/constants/app_specs.dart' - lib\presentation\presets\presets_screen.dart:3:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\schedules\schedules_screen.dart:137:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\schedules\schedules_screen.dart:144:39 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\schedules\schedules_screen.dart:166:15 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\presentation\settings\diagnostics_screen.dart:63:39 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\presentation\settings\diagnostics_screen.dart:64:44 - curly_braces_in_flow_control_structures
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\presentation\settings\settings_screen.dart:178:25 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\settings\settings_screen.dart:253:41 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\settings\simulation_screen.dart:94:32 - deprecated_member_use
+warning - Unused import: '../../data/repositories/lighting_repository.dart' - lib\presentation\splash\splash_screen.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\splash\splash_screen.dart:131:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\splash\splash_screen.dart:174:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\effect_preview.dart:43:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\effect_preview.dart:91:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\effect_preview.dart:115:45 - deprecated_member_use
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\presentation\widgets\effect_preview.dart:141:17 - prefer_const_literals_to_create_immutables
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\feedback_widgets.dart:40:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\feedback_widgets.dart:43:80 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\feedback_widgets.dart:159:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\gold_button.dart:98:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\living_environment.dart:46:74 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\living_environment.dart:49:73 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\widgets\spectrum_picker.dart:93:22 - prefer_const_constructors
+warning - Unused import: 'package:flutter/material.dart' - test\integration_test.dart:3:8 - unused_import
+warning - Unused import: 'package:provider/provider.dart' - test\integration_test.dart:5:8 - unused_import
+   info - Use 'const' for final variables initialized to a constant value - test\integration_test.dart:45:7 - prefer_const_declarations
+   info - Don't invoke 'print' in production code - test\mock_fleet_test.dart:85:7 - avoid_print
+   info - Don't invoke 'print' in production code - test\mock_fleet_test.dart:102:7 - avoid_print
+warning - Unused import: 'package:shared_preferences/shared_preferences.dart' - test\network_service_test.dart:2:8 - unused_import
+warning - The value of the local variable 'attempts' isn't used - test\network_service_test.dart:60:11 - unused_local_variable
+warning - The value of the local variable 'attempts' isn't used - test\network_service_test.dart:127:11 - unused_local_variable
+warning - The value of the local variable 'today' isn't used - test\schedule_service_test.dart:82:13 - unused_local_variable
+warning - Unused import: 'package:provider/provider.dart' - test\widget_test.dart:7:8 - unused_import
+warning - Unused import: 'package:coastal_services_lighting/data/repositories/lighting_repository.dart' - test\widget_test.dart:10:8 - unused_import
+warning - Unused import: 'package:coastal_services_lighting/data/services/auth_service.dart' - test\widget_test.dart:11:8 - unused_import
+

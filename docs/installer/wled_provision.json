@@ -1,0 +1,54 @@
+{
+    "desc": "Coastal Services - Standard 3-Zone Config",
+    "seg": [
+        {
+            "id": 0,
+            "n": "Zone 1 (Entry)",
+            "start": 0,
+            "stop": 50,
+            "grp": 1,
+            "spc": 0,
+            "on": true,
+            "bri": 255
+        },
+        {
+            "id": 1,
+            "n": "Zone 2 (Security)",
+            "start": 50,
+            "stop": 150,
+            "grp": 1,
+            "spc": 0,
+            "on": true,
+            "bri": 255
+        },
+        {
+            "id": 2,
+            "n": "Zone 3 (Architectural)",
+            "start": 150,
+            "stop": 300,
+            "grp": 1,
+            "spc": 0,
+            "on": true,
+            "bri": 255
+        }
+    ],
+    "udpn": {
+        "send": false,
+        "recv": true
+    },
+    "presets": [
+        {
+            "id": 1,
+            "n": "Toggle Power",
+            "on": true,
+            "bri": 0,
+            "win": "T=2",
+            "mainseg": 0
+        }
+    ],
+    "config": {
+        "macros": {
+            "button0": 1
+        }
+    }
+}

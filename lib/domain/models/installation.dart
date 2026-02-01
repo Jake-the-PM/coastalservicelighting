@@ -6,6 +6,7 @@ class Installation {
   final String address;
   final DateTime dateInstalled;
   final List<String> controllerIps;
+  final List<String>? controllerNames; // mDNS Hostnames for self-healing
   final String? previewImage;
   final String? customerEmail;
 
@@ -15,6 +16,7 @@ class Installation {
     required this.address,
     required this.dateInstalled,
     required this.controllerIps,
+    this.controllerNames,
     this.previewImage,
     this.customerEmail,
   });
@@ -26,6 +28,7 @@ class Installation {
       'address': address,
       'dateInstalled': dateInstalled.toIso8601String(),
       'controllerIps': controllerIps,
+      'controllerNames': controllerNames,
       'previewImage': previewImage,
       'customerEmail': customerEmail,
     };
@@ -38,6 +41,7 @@ class Installation {
       address: json['address'],
       dateInstalled: DateTime.parse(json['dateInstalled']),
       controllerIps: List<String>.from(json['controllerIps']),
+      controllerNames: json['controllerNames'] != null ? List<String>.from(json['controllerNames']) : null,
       previewImage: json['previewImage'],
       customerEmail: json['customerEmail'],
     );

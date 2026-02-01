@@ -12,6 +12,7 @@ import 'data/services/installation_service.dart';
 import 'data/services/cloud_installation_service.dart';
 import 'data/services/bridge_relay_service.dart';
 import 'data/services/schedule_service.dart';
+import 'data/services/device_discovery_service.dart';
 import 'core/network/network_service.dart';
 import 'data/wled/wled_client.dart';
 import 'presentation/auth/auth_gate.dart';
@@ -131,8 +132,14 @@ class CoastalAppRoot extends StatelessWidget {
         // Authentication (must be first - other services may depend on it)
         ChangeNotifierProvider(create: (_) => AuthService()),
         
+        // Auto-Discovery Service (Needed for Self-Healing)
+        ChangeNotifierProvider(create: (_) => DeviceDiscoveryService()),
+
         // Local device management
-        ChangeNotifierProvider(create: (_) => LightingRepository(WledClient())),
+        ChangeNotifierProxyProvider<DeviceDiscoveryService, LightingRepository>(
+          create: (_) => LightingRepository(WledClient()),
+          update: (_, discovery, repo) => repo!..setDiscoveryService(discovery),
+        ),
         
         // Automation depends on LightingRepository
         ProxyProvider<LightingRepository, AutomationService>(
@@ -153,6 +160,7 @@ class CoastalAppRoot extends StatelessWidget {
         
         // Scheduling (Sunrise/Sunset Automation)
         ChangeNotifierProvider(create: (_) => ScheduleService()),
+        
       ],
       child: MaterialApp(
         title: AppSpecs.appName,

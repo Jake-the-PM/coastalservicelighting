@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../domain/models/installation.dart';
 import '../../core/constants/app_specs.dart';
 import '../wled/wled_client.dart';
@@ -9,11 +9,20 @@ import '../drivers/i_lighting_driver.dart';
 import '../drivers/wled_real_driver.dart';
 import '../drivers/wled_demo_driver.dart';
 
+import '../services/device_discovery_service.dart';
+
 class LightingRepository extends ChangeNotifier {
   final WledClient _client; // Keep for dependency injection structure
+  final _secureStorage = const FlutterSecureStorage();
+  DeviceDiscoveryService? _discoveryService;
   
-  // Driver Pattern: Decoupled Implementation
-  late ILightingDriver _driver;
+  // Driver Pattern: Decoupled Implementation (Multiplexed)
+  late final ILightingDriver _realDriver;
+  late final ILightingDriver _demoDriver;
+
+  ILightingDriver _getDriver(String ip) {
+    return ip.toLowerCase() == 'demo' ? _demoDriver : _realDriver;
+  }
 
   // Multi-Controller State: Map<IP Address, Last Known State>
   final Map<String, WledState> _controllers = {};
@@ -42,8 +51,13 @@ class LightingRepository extends ChangeNotifier {
   int get globalBrightness => _globalBrightness;
   List<int> get securityColor => _securityColor;
   
+  void setDiscoveryService(DeviceDiscoveryService service) {
+    _discoveryService = service;
+  }
+  
   LightingRepository(this._client) {
-    _driver = WledRealDriver(_client); // Default to Real
+    _realDriver = WledRealDriver(_client);
+    _demoDriver = WledDemoDriver();
     _loadPreferences();
   }
 
@@ -60,15 +74,10 @@ class LightingRepository extends ChangeNotifier {
 
   /// Add a controller to the repository (Connect)
   Future<bool> addController(String ip) async {
-    // DRIVER SWAP LOGIC
-    if (ip.toLowerCase() == 'demo') {
-      _driver = WledDemoDriver(); // Switch to Mock Impl
-    } else {
-      _driver = WledRealDriver(_client); // Ensure Real Impl
-    }
+    final driver = _getDriver(ip);
 
     try {
-      final result = await _driver.getStatus(ip);
+      final result = await driver.getStatus(ip).timeout(const Duration(seconds: 3));
       if (result != null) {
         _controllers[ip] = result.$2;
         _controllerInfos[ip] = result.$1;
@@ -89,8 +98,40 @@ class LightingRepository extends ChangeNotifier {
       }
     } catch (e) {
       print('Failed to add controller $ip: $e');
+      // FALLBACK: Self-Healing Trigger (Conceptual for now, will be wired in Cycle 3)
+      if (ip != 'demo') {
+        _attemptSelfHealing(ip);
+      }
     }
     return false;
+  }
+
+  Future<void> _attemptSelfHealing(String failedIp) async {
+    if (_discoveryService == null || _discoveryService!.isScanning) return;
+    
+    print("SELF-HEALING: Connection to $failedIp lost. Scanning local network...");
+    
+    // Start discovery
+    await _discoveryService!.startDiscovery();
+    
+    // WLED devices are discovered with names. 
+    // If we find a device that has a name matching a stored one (future improvement)
+    // or if we just want to update our internal map with any newly found WLED.
+    
+    // For now: Simple IP-Shift Support
+    // If we find a device and it wasn't in our map, we try to see if it's the one we lost.
+    for (final device in _discoveryService!.devices) {
+      if (!_controllers.containsKey(device.ip)) {
+        // Try adding it. If it responds and it was the only one offline, we've healed.
+        final success = await addController(device.ip);
+        if (success) {
+          print("SELF-HEALING: Recovered connection at new IP: ${device.ip}");
+          // We could potentially remove the old failedIp if we are sure it moved
+          _controllers.remove(failedIp);
+          _controllerInfos.remove(failedIp);
+        }
+      }
+    }
   }
 
   /// Remove a controller
@@ -108,14 +149,13 @@ class LightingRepository extends ChangeNotifier {
     _controllers.clear();
     _controllerInfos.clear();
     
-    // Add all controllers from the installation
-    for (final ip in installation.controllerIps) {
-      await addController(ip);
-    }
+    // Add all controllers from the installation (PARALLEL HYDRATION)
+    await Future.wait(
+      installation.controllerIps.map((ip) => addController(ip))
+    );
     
-    // Persist for next launch
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_active_installation_id', installation.id);
+    // Persist for next launch (SECURE STORAGE)
+    await _secureStorage.write(key: 'last_active_installation_id', value: installation.id);
     
     notifyListeners();
   }
@@ -126,8 +166,7 @@ class LightingRepository extends ChangeNotifier {
     _controllers.clear();
     _controllerInfos.clear();
     
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('last_active_installation_id');
+    await _secureStorage.delete(key: 'last_active_installation_id');
     
     notifyListeners();
   }
@@ -138,7 +177,7 @@ class LightingRepository extends ChangeNotifier {
 
   Future<void> setPower(bool on) async {
     if (currentIp == null) return;
-    await _driver.setJsonState(currentIp!, {'on': on});
+    await _getDriver(currentIp!).setJsonState(currentIp!, {'on': on});
     await addController(currentIp!);
   }
 
@@ -147,10 +186,10 @@ class LightingRepository extends ChangeNotifier {
      _globalBrightness = brightness;
      notifyListeners(); // Optimistic
      
-     for (var ip in _controllers.keys) {
-        await _driver.setJsonState(ip, {'bri': brightness});
-        // Throttle refresh interaction?
-     }
+     // Parallelized Broadcast
+     await Future.wait(_controllers.keys.map((ip) async {
+        await _getDriver(ip).setJsonState(ip, {'bri': brightness});
+     }));
   }
 
   Future<void> applyPreset(int presetId) async {
@@ -158,7 +197,7 @@ class LightingRepository extends ChangeNotifier {
     notifyListeners();
 
     if (currentIp == null) return;
-    await _driver.setJsonState(currentIp!, {'ps': presetId});
+    await _getDriver(currentIp!).setJsonState(currentIp!, {'ps': presetId});
     await addController(currentIp!);
   }
   
@@ -196,7 +235,7 @@ class LightingRepository extends ChangeNotifier {
     if (intensity != null) seg['ix'] = intensity;
     if (rgb != null) seg['col'] = [rgb];
 
-    await _driver.setJsonState(currentIp!, {'seg': [seg]});
+    await _getDriver(currentIp!).setJsonState(currentIp!, {'seg': [seg]});
     
     // Auto-refresh after 800ms to allow WLED internal state to settle
     Timer(const Duration(milliseconds: 800), () => addController(currentIp!));
@@ -229,13 +268,11 @@ class LightingRepository extends ChangeNotifier {
     // Determine on/off state based on brightness
     final bool? isOn = brightness > 0 ? true : (brightness == 0 ? false : null);
     
-    // We need to use the driver directly if we want target specific IP?
-    // Current setSegmentState uses currentIp. 
-    // Let's use driver directly for specific IP targeting.
+    final driver = _getDriver(ip);
     if (isOn != null) {
-       await _driver.setJsonState(ip, {'seg': [{'id': zoneId, 'bri': brightness, 'on': isOn}]});
+       await driver.setJsonState(ip, {'seg': [{'id': zoneId, 'bri': brightness, 'on': isOn}]});
     } else {
-       await _driver.setJsonState(ip, {'seg': [{'id': zoneId, 'bri': brightness}]});
+       await driver.setJsonState(ip, {'seg': [{'id': zoneId, 'bri': brightness}]});
     }
     await addController(ip);
   }
@@ -254,7 +291,7 @@ class LightingRepository extends ChangeNotifier {
     required int priorityId,
   }) async {
     // PURE DELEGATION - NO LOGIC HERE
-    await _driver.triggerReaction(
+    await _getDriver(ip).triggerReaction(
       ip: ip,
       start: start,
       count: count,
@@ -296,10 +333,10 @@ class LightingRepository extends ChangeNotifier {
             "sx": 200, "ix": 200
          }]
        };
-       await _driver.setJsonState(currentIp!, payload);
+       await _getDriver(currentIp!).setJsonState(currentIp!, payload);
     } else {
        // Disable Overlay
-       await _driver.setJsonState(currentIp!, {"seg": [{"id": 11, "on": false}]});
+       await _getDriver(currentIp!).setJsonState(currentIp!, {"seg": [{"id": 11, "on": false}]});
        await applyPreset(_lastPresetId);
     }
     await addController(currentIp!);
@@ -340,7 +377,7 @@ class LightingRepository extends ChangeNotifier {
           }
         ]
       };
-      await _driver.setJsonState(currentIp!, payload);
+      await _getDriver(currentIp!).setJsonState(currentIp!, payload);
       await addController(currentIp!);
     }
   }
@@ -356,7 +393,6 @@ class LightingRepository extends ChangeNotifier {
   }
 
   Future<void> configureZoneCounts(String ip, List<int> counts) async {
-     // Config logic
      if (counts.length < 3) return;
      int z1 = counts[0];
      int z2 = counts[1];
@@ -367,8 +403,36 @@ class LightingRepository extends ChangeNotifier {
        {"id": 2, "start": z1, "stop": z1 + z2, "n": "Zone 2"},
        {"id": 3, "start": z1 + z2, "stop": z1 + z2 + z3, "n": "Zone 3"},
      ];
-     await _driver.setJsonState(ip, {"seg": segs});
-     await addController(ip);
+
+     // ATOMIC SYNC LOOP: No Shortcuts
+     bool verified = false;
+     int retries = 0;
+     
+     while (!verified && retries < 3) {
+       await _getDriver(ip).setJsonState(ip, {"seg": segs});
+       await Future.delayed(const Duration(milliseconds: 500)); // Wait for ESP to commit
+       
+       await addController(ip);
+       final state = getState(ip);
+       
+       if (state != null) {
+         // Check if segments 1, 2, 3 have correct start/stop
+         bool match1 = state.segments.any((s) => s.id == 1 && s.start == 0 && s.stop == z1);
+         bool match2 = state.segments.any((s) => s.id == 2 && s.start == z1 && s.stop == z1 + z2);
+         bool match3 = state.segments.any((s) => s.id == 3 && s.start == z1 + z2 && s.stop == z1 + z2 + z3);
+         
+         if (match1 && match2 && match3) {
+           verified = true;
+         } else {
+           retries++;
+           print("Hardware Sync Mismatch on $ip. Retry $retries...");
+         }
+       }
+     }
+     
+     if (!verified) {
+       throw Exception("Failed to verify hardware segments after 3 attempts on $ip");
+     }
   }
 
   Future<void> toggleSecurityZone(String ip, int zoneId, bool enable) async {
@@ -409,7 +473,7 @@ class LightingRepository extends ChangeNotifier {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _securityModeEnabled = prefs.getBool('security_mode') ?? true;
-    _activeInstallationId = prefs.getString('last_active_installation_id');
+    _activeInstallationId = await _secureStorage.read(key: 'last_active_installation_id');
     // Load Scene Configs (Simplified for now)
   }
   
