@@ -12,6 +12,7 @@ import '../widgets/living_background.dart';
 import 'zone_detail_sheet.dart';
 import 'scene_editor_sheet.dart';
 import '../installer/installer_provisioning_screen.dart';
+import '../settings/automation_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -61,7 +62,7 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                   child: Row(
                     children: [
-                      Image.asset('assets/images/logo.jpg', height: 40),
+                      Image.asset('assets/images/logo.png', height: 40),
                       const SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,6 +87,18 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                       const Spacer(),
+                      _SignalIndicator(ip: repo.zones.isNotEmpty ? repo.zones.first.controllerIp : null),
+                      const SizedBox(width: 12),
+                      LiquidIconButton(
+                        icon: Icons.auto_awesome,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AutomationScreen()),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 12),
                       LiquidIconButton(
                         icon: Icons.settings,
                         onTap: () {
@@ -335,6 +348,57 @@ class DashboardScreen extends StatelessWidget {
 // --- PREMIUM WIDGETS ---
 
 
+
+class _SignalIndicator extends StatelessWidget {
+  final String? ip;
+  
+  const _SignalIndicator({this.ip});
+
+  @override
+  Widget build(BuildContext context) {
+    if (ip == null) return const SizedBox.shrink();
+    
+    final repo = context.watch<LightingRepository>();
+    final info = repo.getControllerInfo(ip!);
+    
+    // Live RSSI from WLED
+    // -100 to -90: Dead
+    // -89 to -80: Weak (Red)
+    // -79 to -65: Fair (Yellow)
+    // -64 to -30: Good (Green)
+    final rssi = info?.rssi ?? -100;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.wifi,
+            size: 14,
+            color: _getSignalColor(repo.isOffline ? -100 : rssi),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            "WIFI",
+            style: GoogleFonts.outfit(fontSize: 10, color: Colors.white38, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getSignalColor(int rssi) {
+    if (rssi == 0 && rssi > -100) return Colors.greenAccent; // Handle 0 default briefly on boot
+    if (rssi <= -90) return Colors.redAccent;
+    if (rssi <= -75) return Colors.orangeAccent;
+    return Colors.greenAccent;
+  }
+}
 
 class _SceneCard extends StatelessWidget {
   final String title;

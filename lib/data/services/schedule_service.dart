@@ -138,9 +138,9 @@ class ScheduleService extends ChangeNotifier {
   List<LightingSchedule> get schedules => List.unmodifiable(_schedules);
   
   // Callback for when a schedule should execute
-  void Function(ScheduleAction action)? onExecute;
+  final LightingRepository _repo;
 
-  ScheduleService() {
+  ScheduleService(this._repo) {
     _loadSchedules();
     _startEvaluationLoop();
   }
@@ -248,8 +248,27 @@ class ScheduleService extends ChangeNotifier {
       _saveSchedules();
     }
     
-    // Invoke callback
-    onExecute?.call(schedule.action);
+    // Protocol Delta: Real-world hardware execution
+    final action = schedule.action;
+    switch (action.type) {
+      case ActionType.turnOn:
+        _repo.setPower(true);
+        break;
+      case ActionType.turnOff:
+        _repo.setPower(false);
+        break;
+      case ActionType.setBrightness:
+        if (action.brightness != null) {
+          _repo.setGlobalBrightness(action.brightness!);
+        }
+        break;
+      case ActionType.applyPreset:
+        if (action.presetId != null) {
+          _repo.applyPreset(action.presetId!);
+        }
+        break;
+    }
+    
     notifyListeners();
   }
 

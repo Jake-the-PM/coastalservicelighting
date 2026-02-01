@@ -13,6 +13,7 @@ import 'data/services/cloud_installation_service.dart';
 import 'data/services/bridge_relay_service.dart';
 import 'data/services/schedule_service.dart';
 import 'data/services/device_discovery_service.dart';
+import 'core/background/background_scheduler.dart';
 import 'core/network/network_service.dart';
 import 'data/wled/wled_client.dart';
 import 'presentation/auth/auth_gate.dart';
@@ -49,6 +50,9 @@ class _BootstrapAppState extends State<BootstrapApp> {
       url: SupabaseConfig.url,
       anonKey: SupabaseConfig.anonKey,
     );
+
+    // Initialize Background Workmanager (Headless)
+    await BackgroundScheduler.init();
     // 2. (Optional) Initialize SharedPreferences here if essential for Theme
   }
 
@@ -109,7 +113,7 @@ class _BootstrapAppState extends State<BootstrapApp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/logo.jpg', width: 120),
+                  Image.asset('assets/images/logo.png', width: 120),
                 ],
               ),
             ),
@@ -159,7 +163,10 @@ class CoastalAppRoot extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NetworkService()),
         
         // Scheduling (Sunrise/Sunset Automation)
-        ChangeNotifierProvider(create: (_) => ScheduleService()),
+        ChangeNotifierProxyProvider<LightingRepository, ScheduleService>(
+          create: (context) => ScheduleService(context.read<LightingRepository>()),
+          update: (_, repo, service) => service!,
+        ),
         
       ],
       child: MaterialApp(

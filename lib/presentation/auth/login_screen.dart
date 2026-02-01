@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                         image: const DecorationImage(
-                          image: AssetImage('assets/images/logo.jpg'),
+                          image: AssetImage('assets/images/logo.png'),
                           fit: BoxFit.contain, // Ensure it fits
                         ),
                       ),

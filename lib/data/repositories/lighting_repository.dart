@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/models/installation.dart';
 import '../../core/constants/app_specs.dart';
 import '../wled/wled_client.dart';
@@ -11,10 +12,24 @@ import '../drivers/wled_demo_driver.dart';
 
 import '../services/device_discovery_service.dart';
 
+enum SyncStatus { idle, syncing, success, error }
+
 class LightingRepository extends ChangeNotifier {
   final WledClient _client; // Keep for dependency injection structure
   final _secureStorage = const FlutterSecureStorage();
   DeviceDiscoveryService? _discoveryService;
+  bool _isDisposed = false;
+  
+  // Protocol Gamma: Synchronization Locks
+  final Map<String, Completer<bool>> _connectionLocks = {};
+  
+  // Protocol Gamma: Identity Fingerprinting
+  final Set<String> _expectedMacs = {};
+  final Map<String, String> _ipToMac = {};
+  
+  // Protocol Gamma: Metadata & Storage Cache
+  String? _cachedInstallationId;
+  final Map<String, String> _macVersions = {}; // Track firmware versions to invalidate cache if updated
   
   // Driver Pattern: Decoupled Implementation (Multiplexed)
   late final ILightingDriver _realDriver;
@@ -36,6 +51,16 @@ class LightingRepository extends ChangeNotifier {
   int _lastPresetId = 0; 
   final Set<int> _securityZoneIds = {1, 2, 3}; 
   List<int> _securityColor = [255, 0, 0]; 
+  
+  // Protocol Delta: Network Squelch
+  final Map<String, Timer?> _settleTimers = {};
+  
+  // Protocol Gamma: Robust Sync State
+  SyncStatus _syncStatus = SyncStatus.idle;
+  String? _lastSyncError;
+
+  SyncStatus get syncStatus => _syncStatus;
+  String? get lastSyncError => _lastSyncError;
 
   // Scene Configurations (Persisted)
   final Map<String, SceneConfig> _sceneConfigs = {};
@@ -71,22 +96,50 @@ class LightingRepository extends ChangeNotifier {
   WledInfo? getInfo(String ip) => _controllerInfos[ip];
   List<String> getEffects(String ip) => _effects[ip] ?? [];
   List<String> getPalettes(String ip) => _palettes[ip] ?? [];
+  String? getMac(String ip) => _ipToMac[ip];
+
 
   /// Add a controller to the repository (Connect)
   Future<bool> addController(String ip) async {
+    // 1. DUP PROTECTION (Locking)
+    if (_connectionLocks.containsKey(ip)) {
+      return _connectionLocks[ip]!.future;
+    }
+    
+    final completer = Completer<bool>();
+    _connectionLocks[ip] = completer;
+
     final driver = _getDriver(ip);
 
     try {
       final result = await driver.getStatus(ip).timeout(const Duration(seconds: 3));
       if (result != null) {
-        _controllers[ip] = result.$2;
-        _controllerInfos[ip] = result.$1;
+        final info = result.$1;
+        final state = result.$2;
+
+        // 2. IDENTITY VERIFICATION (Fingerprinting)
+        // If we have expected MACs (Locked Session), verify this device belongs here
+        if (_expectedMacs.isNotEmpty && ip != 'demo') {
+          if (!_expectedMacs.contains(info.mac)) {
+            print("SECURITY ALERT: Rejected device at $ip. MAC ${info.mac} not in allowed list.");
+            completer.complete(false);
+            _connectionLocks.remove(ip);
+            return false;
+          }
+        }
+
+        _controllers[ip] = state;
+        _controllerInfos[ip] = info;
+        _ipToMac[ip] = info.mac;
         
-        // Fetch Metadata (Lazy)
-        if (!_effects.containsKey(ip)) {
+        // 3. CONGESTION CONTROL (Metadata Caching)
+        // Only fetch effects/palettes if we don't have them OR if firmware version changed
+        final bool versionChanged = _macVersions[info.mac] != info.ver;
+        if (!_effects.containsKey(ip) || versionChanged) {
            if (ip != 'demo') {
              _effects[ip] = await _client.getEffects(ip);
              _palettes[ip] = await _client.getPalettes(ip);
+             _macVersions[info.mac] = info.ver;
            } else {
              _effects[ip] = ["Solid", "Blink", "Breathe", "Rainbow", "Chase", "Tetrix", "Tri-Color Chase", "Android", "Scanner"];
              _palettes[ip] = ["Default", "Ocean", "Lava", "Forest", "Party", "Cloud"];
@@ -94,16 +147,36 @@ class LightingRepository extends ChangeNotifier {
         }
 
         notifyListeners();
+        completer.complete(true);
+        _connectionLocks.remove(ip);
         return true;
       }
     } catch (e) {
       print('Failed to add controller $ip: $e');
-      // FALLBACK: Self-Healing Trigger (Conceptual for now, will be wired in Cycle 3)
+      // FALLBACK: Self-Healing Trigger
       if (ip != 'demo') {
         _attemptSelfHealing(ip);
       }
     }
+    
+    if (_isDisposed) return false;
+    completer.complete(false);
+    _connectionLocks.remove(ip);
     return false;
+  }
+
+  /// Protocol Delta: Diagnostic Fleet Scan
+  Future<Map<String, bool>> diagnoseAll() async {
+    final Map<String, bool> healthMap = {};
+    await Future.wait(_controllers.keys.map((ip) async {
+      try {
+        final result = await _getDriver(ip).getStatus(ip).timeout(const Duration(seconds: 2));
+        healthMap[ip] = result != null;
+      } catch (_) {
+        healthMap[ip] = false;
+      }
+    }));
+    return healthMap;
   }
 
   Future<void> _attemptSelfHealing(String failedIp) async {
@@ -114,21 +187,26 @@ class LightingRepository extends ChangeNotifier {
     // Start discovery
     await _discoveryService!.startDiscovery();
     
-    // WLED devices are discovered with names. 
-    // If we find a device that has a name matching a stored one (future improvement)
-    // or if we just want to update our internal map with any newly found WLED.
-    
-    // For now: Simple IP-Shift Support
-    // If we find a device and it wasn't in our map, we try to see if it's the one we lost.
+    // Identity verification during heal
     for (final device in _discoveryService!.devices) {
       if (!_controllers.containsKey(device.ip)) {
-        // Try adding it. If it responds and it was the only one offline, we've healed.
+        // We don't know the MAC yet, so addController will verify it against _expectedMacs
         final success = await addController(device.ip);
         if (success) {
-          print("SELF-HEALING: Recovered connection at new IP: ${device.ip}");
-          // We could potentially remove the old failedIp if we are sure it moved
-          _controllers.remove(failedIp);
-          _controllerInfos.remove(failedIp);
+          final newMac = _ipToMac[device.ip];
+          final oldMac = _ipToMac[failedIp];
+          
+          if (newMac == oldMac) {
+            print("SELF-HEALING: Recovered identity match for $newMac at new IP: ${device.ip}");
+            _controllers.remove(failedIp);
+            _controllerInfos.remove(failedIp);
+            _ipToMac.remove(failedIp);
+            break; // Healed
+          } else {
+            // Wrong device, addController already verified against _expectedMacs but 
+            // we should be careful here if _expectedMacs is empty (unlocked mode)
+            print("SELF-HEALING: Found WLED at ${device.ip} but MAC mismatch. Moving on.");
+          }
         }
       }
     }
@@ -144,10 +222,18 @@ class LightingRepository extends ChangeNotifier {
   /// Gate 2: Triage - Activate an installation and lock it as the default session
   Future<void> activateInstallation(Installation installation) async {
     _activeInstallationId = installation.id;
+    _cachedInstallationId = installation.id; // Boot cache
+    
+    // Set identity expectations
+    _expectedMacs.clear();
+    if (installation.controllerMacs != null) {
+      _expectedMacs.addAll(installation.controllerMacs!);
+    }
     
     // Clear current controllers to prevent "session bleed"
     _controllers.clear();
     _controllerInfos.clear();
+    _ipToMac.clear();
     
     // Add all controllers from the installation (PARALLEL HYDRATION)
     await Future.wait(
@@ -157,14 +243,21 @@ class LightingRepository extends ChangeNotifier {
     // Persist for next launch (SECURE STORAGE)
     await _secureStorage.write(key: 'last_active_installation_id', value: installation.id);
     
+    // Persist IPs for Background Scheduler (Workmanager)
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('coastal_cached_ips', installation.controllerIps);
+
     notifyListeners();
   }
 
   /// Gate 1: Audit - Clear the locked session (e.g. on logout)
   Future<void> clearActiveSession() async {
     _activeInstallationId = null;
+    _cachedInstallationId = null;
+    _expectedMacs.clear();
     _controllers.clear();
     _controllerInfos.clear();
+    _ipToMac.clear();
     
     await _secureStorage.delete(key: 'last_active_installation_id');
     
@@ -237,8 +330,11 @@ class LightingRepository extends ChangeNotifier {
 
     await _getDriver(currentIp!).setJsonState(currentIp!, {'seg': [seg]});
     
-    // Auto-refresh after 800ms to allow WLED internal state to settle
-    Timer(const Duration(milliseconds: 800), () => addController(currentIp!));
+    // Protocol Delta: Squelch logic for settled refresh
+    _settleTimers[currentIp!]?.cancel();
+    _settleTimers[currentIp!] = Timer(const Duration(milliseconds: 800), () {
+      if (!_isDisposed) addController(currentIp!);
+    });
   }
 
   // ===========================================================================
@@ -394,6 +490,11 @@ class LightingRepository extends ChangeNotifier {
 
   Future<void> configureZoneCounts(String ip, List<int> counts) async {
      if (counts.length < 3) return;
+     
+     _syncStatus = SyncStatus.syncing;
+     _lastSyncError = null;
+     notifyListeners();
+
      int z1 = counts[0];
      int z2 = counts[1];
      int z3 = counts[2];
@@ -404,34 +505,45 @@ class LightingRepository extends ChangeNotifier {
        {"id": 3, "start": z1 + z2, "stop": z1 + z2 + z3, "n": "Zone 3"},
      ];
 
-     // ATOMIC SYNC LOOP: No Shortcuts
-     bool verified = false;
-     int retries = 0;
-     
-     while (!verified && retries < 3) {
-       await _getDriver(ip).setJsonState(ip, {"seg": segs});
-       await Future.delayed(const Duration(milliseconds: 500)); // Wait for ESP to commit
+     try {
+       // ATOMIC SYNC LOOP: No Shortcuts
+       bool verified = false;
+       int retries = 0;
        
-       await addController(ip);
-       final state = getState(ip);
-       
-       if (state != null) {
-         // Check if segments 1, 2, 3 have correct start/stop
-         bool match1 = state.segments.any((s) => s.id == 1 && s.start == 0 && s.stop == z1);
-         bool match2 = state.segments.any((s) => s.id == 2 && s.start == z1 && s.stop == z1 + z2);
-         bool match3 = state.segments.any((s) => s.id == 3 && s.start == z1 + z2 && s.stop == z1 + z2 + z3);
+       while (!verified && retries < 3) {
+         await _getDriver(ip).setJsonState(ip, {"seg": segs});
+         await Future.delayed(const Duration(milliseconds: 500)); // Wait for ESP to commit
          
-         if (match1 && match2 && match3) {
-           verified = true;
+         await addController(ip);
+         final state = getState(ip);
+         
+         if (state != null) {
+           bool match1 = state.segments.any((s) => s.id == 1 && s.start == 0 && s.stop == z1);
+           bool match2 = state.segments.any((s) => s.id == 2 && s.start == z1 && s.stop == z1 + z2);
+           bool match3 = state.segments.any((s) => s.id == 3 && s.start == z1 + z2 && s.stop == z1 + z2 + z3);
+           
+           if (match1 && match2 && match3) {
+             verified = true;
+           } else {
+             retries++;
+             print("Hardware Sync Mismatch on $ip. Retry $retries...");
+           }
          } else {
            retries++;
-           print("Hardware Sync Mismatch on $ip. Retry $retries...");
          }
        }
-     }
-     
-     if (!verified) {
-       throw Exception("Failed to verify hardware segments after 3 attempts on $ip");
+       
+       if (verified) {
+         _syncStatus = SyncStatus.success;
+       } else {
+         _syncStatus = SyncStatus.error;
+         _lastSyncError = "Hardware failed to confirm segment mapping after 3 attempts.";
+       }
+     } catch (e) {
+       _syncStatus = SyncStatus.error;
+       _lastSyncError = e.toString();
+     } finally {
+       notifyListeners();
      }
   }
 
@@ -473,8 +585,10 @@ class LightingRepository extends ChangeNotifier {
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _securityModeEnabled = prefs.getBool('security_mode') ?? true;
+    
+    // Boot Path Optimization: Use manual cache until first read finishes
     _activeInstallationId = await _secureStorage.read(key: 'last_active_installation_id');
-    // Load Scene Configs (Simplified for now)
+    _cachedInstallationId = _activeInstallationId;
   }
   
   SceneConfig getSceneConfig(String id) => _sceneConfigs[id] ?? SceneConfig.defaults(id);
@@ -487,8 +601,17 @@ class LightingRepository extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (!_isDisposed) super.notifyListeners();
+  }
+
+  @override
   void dispose() {
+    _isDisposed = true;
     for (var timer in _debounceTimers.values) {
+      timer.cancel();
+    }
+    for (var timer in _settleTimers.values) {
       timer.cancel();
     }
     super.dispose();

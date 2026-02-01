@@ -12,6 +12,7 @@ import 'scan_key_screen.dart';
 import '../onboarding/zone_mapping_screen.dart';
 import '../widgets/shimmer_effect.dart';
 import '../widgets/feedback_widgets.dart';
+import 'diagnostic_dashboard.dart';
 
 class InstallerDashboardScreen extends StatefulWidget {
   const InstallerDashboardScreen({super.key});
@@ -46,6 +47,12 @@ class _InstallerDashboardScreenState extends State<InstallerDashboardScreen> {
             icon: const Icon(Icons.qr_code_scanner, color: Colors.white54),
             onPressed: () {
                Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanKeyScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined, color: Colors.white54),
+            onPressed: () {
+               Navigator.push(context, MaterialPageRoute(builder: (_) => const DiagnosticDashboard()));
             },
           ),
         ],
@@ -121,7 +128,7 @@ class _InstallationCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.white10),
           image: installation.previewImage != null ? DecorationImage(
-            image: NetworkImage(installation.previewImage!), // TODO: FileProvider
+            image: NetworkImage(installation.previewImage!),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.7), BlendMode.darken),
           ) : null,

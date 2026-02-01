@@ -7,6 +7,7 @@ class Installation {
   final DateTime dateInstalled;
   final List<String> controllerIps;
   final List<String>? controllerNames; // mDNS Hostnames for self-healing
+  final List<String>? controllerMacs; // Hardware fingerprints for identity verification
   final String? previewImage;
   final String? customerEmail;
 
@@ -17,6 +18,7 @@ class Installation {
     required this.dateInstalled,
     required this.controllerIps,
     this.controllerNames,
+    this.controllerMacs,
     this.previewImage,
     this.customerEmail,
   });
@@ -29,6 +31,7 @@ class Installation {
       'dateInstalled': dateInstalled.toIso8601String(),
       'controllerIps': controllerIps,
       'controllerNames': controllerNames,
+      'controllerMacs': controllerMacs,
       'previewImage': previewImage,
       'customerEmail': customerEmail,
     };
@@ -42,6 +45,7 @@ class Installation {
       dateInstalled: DateTime.parse(json['dateInstalled']),
       controllerIps: List<String>.from(json['controllerIps']),
       controllerNames: json['controllerNames'] != null ? List<String>.from(json['controllerNames']) : null,
+      controllerMacs: json['controllerMacs'] != null ? List<String>.from(json['controllerMacs']) : null,
       previewImage: json['previewImage'],
       customerEmail: json['customerEmail'],
     );

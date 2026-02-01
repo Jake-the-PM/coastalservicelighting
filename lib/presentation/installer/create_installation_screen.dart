@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -18,16 +19,40 @@ class _CreateInstallationScreenState extends State<CreateInstallationScreen> {
   String _address = '';
   String _customerEmail = '';
   final List<String> _ips = [];
+  final Map<String, String> _ipToMac = {};
+  bool _isAdding = false;
   
   // Controller for IP input
   final TextEditingController _ipController = TextEditingController();
 
-  void _addIp() {
-    if (_ipController.text.isNotEmpty) {
-      setState(() {
-        _ips.add(_ipController.text);
-        _ipController.clear();
-      });
+  void _addIp() async {
+    final ip = _ipController.text.trim();
+    if (ip.isEmpty) return;
+    
+    setState(() => _isAdding = true);
+    
+    try {
+      final repo = context.read<LightingRepository>();
+      final success = await repo.addController(ip);
+      
+      if (success) {
+        final mac = repo.getMac(ip);
+        setState(() {
+          if (!_ips.contains(ip)) {
+            _ips.add(ip);
+            if (mac != null) _ipToMac[ip] = mac;
+          }
+          _ipController.clear();
+        });
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not connect to controller. Check IP.")),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isAdding = false);
     }
   }
 
@@ -41,6 +66,7 @@ class _CreateInstallationScreenState extends State<CreateInstallationScreen> {
         address: _address,
         dateInstalled: DateTime.now(),
         controllerIps: _ips.isNotEmpty ? _ips : ['192.168.4.1'], // Default AP
+        controllerMacs: _ips.map((ip) => _ipToMac[ip] ?? 'unknown').toList(),
         customerEmail: _customerEmail.isNotEmpty ? _customerEmail : null,
       );
 
@@ -113,21 +139,26 @@ class _CreateInstallationScreenState extends State<CreateInstallationScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: _addIp,
-                    icon: const Icon(Icons.add_circle, color: Color(0xFFD4AF37), size: 32),
-                  )
+                  _isAdding 
+                    ? const SizedBox(width: 32, height: 32, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFD4AF37)))
+                    : IconButton(
+                        onPressed: _addIp,
+                        icon: const Icon(Icons.add_circle, color: Color(0xFFD4AF37), size: 32),
+                      )
                 ],
               ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 children: _ips.map((ip) => Chip(
-                  label: Text(ip),
+                  label: Text("$ip (${_ipToMac[ip]?.substring(max(0, _ipToMac[ip]!.length - 6)) ?? '?'})"),
                   backgroundColor: Colors.white10,
-                  labelStyle: const TextStyle(color: Colors.white),
+                  labelStyle: const TextStyle(color: Colors.white, fontSize: 12),
                   deleteIcon: const Icon(Icons.close, size: 16, color: Colors.white54),
-                  onDeleted: () => setState(() => _ips.remove(ip)),
+                  onDeleted: () => setState(() {
+                    _ips.remove(ip);
+                    _ipToMac.remove(ip);
+                  }),
                 )).toList(),
               ),
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/services.dart';
 import '../../domain/models/installation.dart';
 
 class GoldenKeyScreen extends StatelessWidget {
@@ -112,14 +113,14 @@ class GoldenKeyScreen extends StatelessWidget {
               // Share Button (Future: Native Share)
               OutlinedButton.icon(
                 onPressed: () {
-                  // TODO: Share sheet with QR image or deep link
+                  Clipboard.setData(ClipboardData(text: jsonData));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Share functionality coming soon!")),
+                    const SnackBar(content: Text("Golden Key copied to clipboard")),
                   );
                 },
-                icon: const Icon(Icons.share, color: Color(0xFFD4AF37)),
+                icon: const Icon(Icons.copy, color: Color(0xFFD4AF37)),
                 label: Text(
-                  "SHARE KEY",
+                  "COPY KEY",
                   style: GoogleFonts.outfit(color: const Color(0xFFD4AF37)),
                 ),
                 style: OutlinedButton.styleFrom(

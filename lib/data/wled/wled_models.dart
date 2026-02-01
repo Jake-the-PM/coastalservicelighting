@@ -15,7 +15,14 @@ class WledInfo {
     required this.maxSegments,
     required this.name,
     required this.arch,
+    this.rssi = 0,
+    this.uptime = 0,
+    this.freeHeap = 0,
   });
+
+  final int rssi; // -100 to 0
+  final int uptime; // seconds
+  final int freeHeap; // bytes
 
   factory WledInfo.fromJson(Map<String, dynamic> json) {
     final leds = json['leds'] as Map<String, dynamic>? ?? {};
@@ -27,6 +34,9 @@ class WledInfo {
       maxSegments: leds['maxseg'] as int? ?? 1,
       name: json['name'] as String? ?? 'WLED',
       arch: json['arch'] as String? ?? 'unknown',
+      rssi: (json['wifi']?['rssi'] as int?) ?? 0,
+      uptime: json['uptime'] as int? ?? 0,
+      freeHeap: json['freeheap'] as int? ?? 0,
     );
   }
 }

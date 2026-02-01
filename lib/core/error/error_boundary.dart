@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Global error handler that wraps the app to catch unhandled exceptions.
@@ -138,7 +140,10 @@ class ErrorScreen extends StatelessWidget {
               // Support Link
               TextButton(
                 onPressed: () {
-                  // TODO: Open support email or link
+                  Clipboard.setData(const ClipboardData(text: "support@coastalservices.com"));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Support email copied to clipboard")),
+                  );
                 },
                 child: Text(
                   "Contact Support",

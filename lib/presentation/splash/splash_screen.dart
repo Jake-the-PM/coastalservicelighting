@@ -145,7 +145,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   ),
                 ],
                 image: const DecorationImage(
-                   image: AssetImage('assets/images/logo.jpg'),
+                   image: AssetImage('assets/images/logo.png'),
                    fit: BoxFit.contain, // Contain to respect aspect ratio
                 ),
               ),
