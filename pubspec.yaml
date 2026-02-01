@@ -1,0 +1,44 @@
+name: coastal_services_lighting
+description: Premium Permanent Lighting Control App for Coastal Services.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.0.5
+
+  # Networking & UUID
+  http: ^1.1.0
+  uuid: ^4.2.2
+  connectivity_plus: ^5.0.2
+  multicast_dns: ^0.3.2+1
+
+  # Persistence (Installer Mapping)
+  shared_preferences: ^2.2.2
+
+  # UI & Design
+  google_fonts: ^6.1.0
+  gap: ^3.0.0 # Consistent spacing
+  flutter_svg: ^2.0.9
+  animations: ^2.0.11
+  intl: ^0.19.0
+  qr_flutter: ^4.1.0
+
+  # Supabase (Enterprise Cloud)
+  supabase_flutter: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
